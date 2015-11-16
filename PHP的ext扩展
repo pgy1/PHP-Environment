@@ -3,13 +3,26 @@
 1.集成Redis
 需同php版本的php_igbinary.dll组件 http://windows.php.net/downloads/pecl/releases/igbinary/1.1.1/
 需同php版本的php_redis.dll组件
-2.集成memcached
-需同php版本的php_memcached.dll组件
-
-
 
 将其放入php文件夹下的ext文件夹
 然后再php.ini中引用
 extension=php_igbinary.dll#必须在redis组件之前
 extension=php_redis.dll
 extension=php_memcached.dll
+
+2.集成memcached
+需同php版本的php_memcached.dll组件
+
+将其放入php文件夹下的ext文件夹
+然后再php.ini中引用
+extension=php_memcached.dll
+
+3.为apache和php设置依赖
+
+# php5 support
+LoadModule php5_module c:/php5/php5apache2_4.dll
+AddType application/x-httpd-php .php .html .htm
+# configure thepath to php.ini
+PHPIniDir "c:/php5"
+
+
