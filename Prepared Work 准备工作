@@ -82,5 +82,6 @@ Apache安装包 http://www.apachelounge.com/download/
         </Directory>
 　　接下来就可以启动Apache了
 　　开始---运行,输入cmd,打开命令提示符。接着进入c:＼Apache24＼bin目录下回车httpd回车
+配置Apache与php的依赖，请看本文件夹下的“PHP的ext扩展”文件
 
 
