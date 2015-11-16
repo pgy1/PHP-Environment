@@ -1,6 +1,6 @@
 #Windows下环境安装的准备工作
 
-1.php安装
+1.安装php
 php安装包 http://www.php.net/downloads.php
 
 解压php安装包到C:\php5。
@@ -29,12 +29,16 @@ TCP 127.0.0.1:9000 HongJunWen-PC:0 LISTENING
 鼠标双击nginx.exe，启动nginx
 进入任务管理器进程选项卡，如找到nginx.exe进程，即确认nginx已启动
 
-3.安装mysql
-双击mysql.msi安装包进入安装环境界面，我选择默认选项进行安装，
+3.安装mysql 
+mysql安装包 http://dev.mysql.com/downloads/mysql/
+
+双击mysql.msi安装包进入安装环境界面，我选择c:\mysql进行安装，
 采用Typical(典型安装)，并启动MySQL配置向导，选择默认选项配置，
 此处编码我选择的是UTF-8，设置数据库密码后，“Execute ”执行，点击“Finish”完成安装。
 
 4.安装phpMyAdmin
+
+安装到c:\phpmyadmin
 用记事本打开phpMyAdmin下的config.default.php文件,开始配置phpMyAdmin，依次找到如下位置填写参数进行修改：
 $cfg['PmaAbsoluteUri'] = 'http://127.0.0.1/phpMyAdmin/';  //这里填写phpmyadmin的访问网址
 $cfg['Servers'][$i]['host'] = 'localhost';  // mysql的ip地址，mysql和该phpmyadmin在同一服务器，则默认localhost。
@@ -45,6 +49,38 @@ $cfg['Servers'][$i]['auth_type'] = 'cookie'; //PHP安装模式为Apache，可使
 $cfg['Servers'][$i]['only_db'] = '';    // 你只有一个数据就设置为你的数据库名；如果是架设服务器，那么建议留空
 $cfg['blowfish_secret'] = 'blank123';   //上面采用认证方法为cookie，就要设置短语密码，密码由自己设置
 
+5.安装Apache
+Apache安装包 http://www.apachelounge.com/download/
 
+解压下载的安装包:httpd-win64-VC11.zip 将其放到自己的安装目录(我的目录c:＼Apache24)
+　　然后对http.conf(c:＼Apache24＼conf＼http.conf)配置文件进行修改-使用记事本打开就行
+　　　 (1)修改ServerRoot Apache的根路径:
+        　　(37行)ServerRoot"c:/Apache24"改成=>ServerRoot "c:/Apache24"
+    　　(2)修改ServerName你的主机名称:
+        　　(217行)ServerNamewww.example.com:80将前面的#去掉,该属性在从命令行启动Apache时需要用到。
+    　　(3)修改DocumentRoot Apache访问的主文件夹目录,就是php、html代码文件的位置。
+    　　Apache默认的路径是在htdocs(c:＼Apache24＼htdocs)下面,里面会有个简单的入口文件index.html。
+　　　　(247行) DocumentRoot "c:/Apache24/htdocs"
+        　<Directory"c:/Apache24/htdocs">
+    　　(4)修改入口文件配置:DirectoryIndex一般情况下我们都是以index.php、index.html、index.htm作为web项目的入口。
+    　　Apache默认的入口只有index.html需要添加其他两个的支持，当然这个入口文件的设置可以根据自己的需要增减,
+    　　如果要求比较严格的话可以只写一个index.php,这样在项目里面的入口就只能是index.php
+    　　<IfModuledir_module>
+        DirectoryIndexindex.html
+       </IfModule>
+　　改为=>
+       <IfModuledir_module>
+        DirectoryIndex  index.php index.htm index.html
+        </IfModule>
+   　　(5)设定serverscript的目录:
+        (358行)ScriptAlias/cgi-bin/ "c:/Apache24/cgi-bin/
+  　　(6)(374行)
+        <Directory"c:/Apache24/cgi-bin">
+          AllowOverride None
+          Options None
+          Require all granted
+        </Directory>
+　　接下来就可以启动Apache了
+　　开始---运行,输入cmd,打开命令提示符。接着进入c:＼Apache24＼bin目录下回车httpd回车
 
 
