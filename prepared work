@@ -1,0 +1,45 @@
+#Windows下环境安装的准备工作
+
+1.php安装
+php安装包 http://www.php.net/downloads.php
+
+解压php安装包到C:\php5。
+解压RunHiddenConsole.zip 文件RunHiddenConsole.exe到C:\php5，已备后用。
+进入C:\php5目录内，备份php.ini-development一份，将php.ini-development重命名为php.ini（PHP配置文件），用记事本打开。
+查找定位：
+; extension_dir = "ext" ，删除前面的分号并修改为：extension_dir = "C:/php5/ext"
+;extension=php_gd2.dll，删除前面的分号：extension=php_gd2.dll
+;extension=php_mbstring.dll，删除前面的分号：extension=php_mbstring.dll
+;extension=php_mysql.dll，删除前面的分号：extension=php_mysql.dll
+;extension=php_mysqli.dll，删除前面的分号：extension=php_mysqli.dll
+;extension=php_pdo_mysql.dll，删除前面的分号：extension=php_pdo_mysql.dll
+;cgi.force_redirect = 1，删除前面的分号：cgi.force_redirect = 1
+;cgi.fix_pathinfo=1，删除前面的分号：cgi.fix_pathinfo=1
+;cgi.rfc2616_headers = 0，删除前面的分号：cgi.rfc2616_headers = 1
+
+启动php-cgi 服务:进入命令提示符界面，进入C:\php5>，
+使用命令：RunHiddenConsole.exe php-cgi.exe -b 127.0.0.1:9000 -c php.ini 
+使用命令： netstat -a ，回车显示如下信息
+TCP 127.0.0.1:9000 HongJunWen-PC:0 LISTENING 
+说明php-cgi启动成功。
+
+2.安装nginx
+
+解压nginx.zip文件至C:\nginx，并进入该文件夹内，找到nginx.exe
+鼠标双击nginx.exe，启动nginx
+进入任务管理器进程选项卡，如找到nginx.exe进程，即确认nginx已启动
+
+3.安装mysql
+双击mysql.msi安装包进入安装环境界面，我选择默认选项进行安装，
+采用Typical(典型安装)，并启动MySQL配置向导，选择默认选项配置，
+此处编码我选择的是UTF-8，设置数据库密码后，“Execute ”执行，点击“Finish”完成安装。
+
+4.安装phpMyAdmin
+用记事本打开phpMyAdmin下的config.default.php文件,开始配置phpMyAdmin，依次找到如下位置填写参数进行修改：
+$cfg['PmaAbsoluteUri'] = 'http://127.0.0.1/phpMyAdmin/';  //这里填写phpmyadmin的访问网址
+$cfg['Servers'][$i]['host'] = 'localhost';  // MySQL hostname or IP address，mysql所在服务器的ip地址，如果mysql和该phpmyadmin在同一服务器，则按默认localhost。
+$cfg['Servers'][$i]['port'] = '';   // MySQL port - leave blank for default port ，mysql端口，如果是默认3306，保留为空即可。
+$cfg['Servers'][$i]['user'] = 'root';   // MySQL user 访问phpmyadmin使用的mysql用户名 。fg['Servers'][$i]['password'] = 'root123';   // MySQL password (对应上面mysql用户名的密码。
+$cfg['Servers'][$i]['auth_type'] = 'cookie';   //此处有四种模式供选择：cookie、http、HTTP、config 。config方式：输入phpmyadmin的访问网址即直接进入，无需输入用户名和密码，该方式不安全，不推荐使用；cookie，http或HTTP方式，登录phpmyadmin需要数据用户名和密码进行验证，具体如下： PHP安装模式为Apache，可以使用http和cookie； PHP安装模式为CGI，使用cookie。此次PHP安装模式为CGI，采用cookie方式。
+$cfg['Servers'][$i]['only_db'] = '';    // 你只有一个数据就设置为你的数据库名；如果是架设服务器，那么建议留空。此处我留空。
+$cfg['blowfish_secret'] = 'blank123';   //上面采用认证方法为cookie，就要设置短语密码，密码由自己设置，但是不能为空，否则会在登录phpmyadmin时提示错误。此处我设置的是blank123。
