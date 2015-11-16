@@ -7,6 +7,7 @@ PHP集成环境的搭建
 2.nginx的安装
 3.mysql的安装
 4.phpmyadmin的安装
+5.Apache的安装
 
 php的ext扩展
 1.集成Redis
