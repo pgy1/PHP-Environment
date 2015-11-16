@@ -44,3 +44,7 @@ $cfg['Servers'][$i]['password'] = 'root123';  // MySQL password (对应上面mys
 $cfg['Servers'][$i]['auth_type'] = 'cookie'; //PHP安装模式为Apache，可使用http和cookie；安装模式为CGI，使用cookie。
 $cfg['Servers'][$i]['only_db'] = '';    // 你只有一个数据就设置为你的数据库名；如果是架设服务器，那么建议留空
 $cfg['blowfish_secret'] = 'blank123';   //上面采用认证方法为cookie，就要设置短语密码，密码由自己设置
+
+
+
+
