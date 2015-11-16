@@ -7,7 +7,7 @@ php安装包 http://www.php.net/downloads.php
 解压RunHiddenConsole.zip 文件RunHiddenConsole.exe到C:\php5，已备后用。
 进入C:\php5目录内，备份php.ini-development一份，将php.ini-development重命名为php.ini（PHP配置文件），用记事本打开。
 查找定位：
-; extension_dir = "ext" ，删除前面的分号并修改为：extension_dir = "C:/php5/ext"
+;extension_dir = "ext" ，删除前面的分号并修改为：extension_dir = "C:/php5/ext"
 ;extension=php_gd2.dll，删除前面的分号：extension=php_gd2.dll
 ;extension=php_mbstring.dll，删除前面的分号：extension=php_mbstring.dll
 ;extension=php_mysql.dll，删除前面的分号：extension=php_mysql.dll
@@ -55,11 +55,11 @@ Apache安装包 http://www.apachelounge.com/download/
 解压下载的安装包:httpd-win64-VC11.zip 将其放到自己的安装目录(我的目录c:＼Apache24)
 　　然后对http.conf(c:＼Apache24＼conf＼http.conf)配置文件进行修改-使用记事本打开就行
 　　　 (1)修改ServerRoot Apache的根路径:
-        　　(37行)ServerRoot"c:/Apache24"改成=>ServerRoot "c:/Apache24"
+        　　ServerRoot"c:/Apache24"
     　　(2)修改ServerName你的主机名称:
-        　　(217行)ServerNamewww.example.com:80将前面的#去掉,该属性在从命令行启动Apache时需要用到。
+        　　ServerName www.example.com:80将前面的#去掉,该属性在从命令行启动Apache时需要用到。
     　　(3)修改DocumentRoot Apache访问的主文件夹目录,就是php、html代码文件的位置。
-    　　Apache默认的路径是在htdocs(c:＼Apache24＼htdocs)下面,里面会有个简单的入口文件index.html。
+    　　Apache默认的路径是在htdocs(c:/Apache24/htdocs)下面,里面会有个简单的入口文件index.html。
 　　　　(247行) DocumentRoot "c:/Apache24/htdocs"
         　<Directory"c:/Apache24/htdocs">
     　　(4)修改入口文件配置:DirectoryIndex一般情况下我们都是以index.php、index.html、index.htm作为web项目的入口。
