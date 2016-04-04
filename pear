@@ -1,0 +1,19 @@
+
+xampp中 pecl、pear管理
+
+pear和pecl有不同的扩展包库
+
+pecl 包库http://pecl.php.net/packages.php
+pear 包库http://pear.php.net/packages.php
+
+cmd命令进入php文件夹
+
+输入命令pear -h
+可以查看pear的命令
+pear upgrade-all 可以升级所有的包
+
+输入命令pecl -h
+可以查看pecl的命令
+pecl upgrade-all 可以升级所有的包
+
+两者的命令相近，但是拥有的包库资源不同
