@@ -1,0 +1,301 @@
+
+SORT key [BY pattern] [LIMIT offset count] [GET pattern [GET pattern ...]] [ASC | DESC] [ALPHA] [STORE destination]
+
+排序，分页等
+
+参数
+array(
+‘by’ => ‘some_pattern_*’,
+‘limit’ => array(0, 1),
+‘get’ => ‘some_other_pattern_*’ or an array of patterns,
+‘sort’ => ‘asc’ or ‘desc’,
+‘alpha’ => TRUE,
+‘store’ => ‘external-key’
+)
+
+返回或保存给定列表、集合、有序集合key中经过排序的元素。
+
+排序默认以数字作为对象，值被解释为双精度浮点数，然后进行比较。
+
+ 
+
+一般SORT用法
+
+最简单的SORT使用方法是SORT key。
+
+假设today_cost是一个保存数字的列表，SORT命令默认会返回该列表值的递增(从小到大)排序结果。
+
+# 将数据一一加入到列表中
+$redis->LPUSH('today_cost', 30);
+$redis->LPUSH('today_cost', 1.5);
+$redis->LPUSH('today_cost', 10);
+$redis->LPUSH('today_cost', 8);
+# 排序
+var_dump($redis->SORT('today_cost')); 
+//array(4) { [0]=> string(3) "1.5" [1]=> string(1) "8" [2]=> string(2) "10" [3]=> string(2) "30" }
+
+当数据集中保存的是字符串值时，你可以用ALPHA修饰符(modifier)进行排序。
+
+# 将数据一一加入到列表中
+$redis->LPUSH('website', "www.reddit.com");
+$redis->LPUSH('website', "www.slashdot.com");
+$redis->LPUSH('website', "www.infoq.com");
+# 默认排序
+var_dump($redis->SORT('website'));
+//array(3) { [0]=> string(13) "www.infoq.com" [1]=> string(16) "www.slashdot.com" [2]=> string(14) "www.reddit.com" }
+
+# 按字符排序 ALPHA=true
+var_dump($redis->SORT('website', array('ALPHA'=>TRUE))); //array(3) { [0]=> string(13) "www.infoq.com" [1]=> string(14) "www.reddit.com" [2]=> string(16) "www.slashdot.com" }
+
+如果你正确设置了!LC_COLLATE环境变量的话，Redis能识别UTF-8编码。
+
+排序之后返回的元素数量可以通过LIMIT修饰符进行限制。
+LIMIT修饰符接受两个参数：offset和count。
+offset指定要跳过的元素数量，count指定跳过offset个指定的元素之后，要返回多少个对象。
+
+# 将数据一一加入到列表中
+$redis->LPUSH('rank', 30); //(integer) 1
+$redis->LPUSH('rank', 56); //(integer) 2
+$redis->LPUSH('rank', 42); //(integer) 3
+$redis->LPUSH('rank', 22); //(integer) 4
+$redis->LPUSH('rank', 0);  //(integer) 5
+$redis->LPUSH('rank', 11); //(integer) 6
+$redis->LPUSH('rank', 32); //(integer) 7
+$redis->LPUSH('rank', 67); //(integer) 8
+$redis->LPUSH('rank', 50); //(integer) 9
+$redis->LPUSH('rank', 44); //(integer) 10
+$redis->LPUSH('rank', 55); //(integer) 11
+
+# 排序
+$redis_sort_option=array('LIMIT'=>array(0,5));
+var_dump($redis->SORT('rank',$redis_sort_option));   # 返回排名前五的元素 
+// array(5) { [0]=> string(1) "0" [1]=> string(2) "11" [2]=> string(2) "22" [3]=> string(2) "30" [4]=> string(2) "32" }
+
+修饰符可以组合使用。以下例子返回降序(从大到小)的前5个对象。
+
+$redis_sort_option=array(
+            'LIMIT'=>array(0,5),
+            'SORT'=>'DESC'
+            );
+var_dump($redis->SORT('rank',$redis_sort_option)); 
+//array(5) { [0]=> string(2) "67" [1]=> string(2) "56" [2]=> string(2) "55" [3]=> string(2) "50" [4]=> string(2) "44" }
+
+使用外部key进行排序
+
+有时候你会希望使用外部的key作为权重来比较元素，代替默认的对比方法。
+
+假设现在有用户(user)数据如下：
+
+id　　　  name　　　　level
+-------------------------------
+1　　　　admin　　　  9999
+2　　　　huangz　　　10
+59230 　jack 　　　    3
+222 　　 hacker 　　   9999
+
+id数据保存在key名为user_id的列表中。
+name数据保存在key名为user_name_{id}的列表中
+level数据保存在user_level_{id}的key中。
+
+# 先将要使用的数据加入到数据库中
+
+# admin
+$redis->LPUSH('user_id', 1);//(integer) 1
+$redis->SET('user_name_1', 'admin');
+$redis->SET('user_level_1',9999);
+
+# huangz
+$redis->LPUSH('user_id', 2);//(integer) 2
+$redis->SET('user_name_2', 'huangz');
+$redis->SET('user_level_2', 10);
+
+# jack
+$redis->LPUSH('user_id', 59230);//(integer) 3
+$redis->SET('user_name_59230','jack');
+$redis->SET('user_level_59230', 3);
+
+# hacker
+$redis->LPUSH('user_id', 222);  //(integer) 4
+$redis->SET('user_name_222', 'hacker');
+$redis->SET('user_level_222', 9999);
+
+$redis_sort_option=array('BY'=>'user_level_*',
+            'SORT'=>'DESC'
+            );
+var_dump($redis->SORT('user_id',$redis_sort_option)); 
+//array(4) { [0]=> string(3) "222" [1]=> string(1) "1" [2]=> string(1) "2" [3]=> string(5) "59230" }
+
+#---------------------------
+#1) "222"    # hacker
+#2) "1"      # admin
+#3) "2"      # huangz
+#4) "59230"  # jack
+
+但是有时候只是返回相应的id没有什么用，你可能更希望排序后返回id对应的用户名，这样更友好一点，使用GET选项可以做到这一点：
+
+$redis_sort_option=array('BY'=>'user_level_*',
+            'SORT'=>'DESC',
+            'GET'=>'user_name_*'
+            );
+var_dump($redis->SORT('user_id', $redis_sort_option)); //array(4) { [0]=> string(6) "hacker" [1]=> string(5) "admin" [2]=> string(6) "huangz" [3]=> string(4) "jack" }
+#1) "hacker"
+#2) "admin"
+#3) "huangz"
+#4) "jack"
+
+可以多次地、有序地使用GET操作来获取更多外部key。
+比如你不但希望获取用户名，还希望连用户的密码也一并列出，可以使用以下命令：
+
+# 先添加一些测试数据
+$redis->SET('user_password_222', "hey,im in");
+$redis->SET('user_password_1', "a_long_long_password");
+$redis->SET('user_password_2', "nobodyknows");
+$redis->SET('user_password_59230', "jack201022");
+
+# 获取name和password
+$redis_sort_option=array('BY'=>'user_level_*',
+            'SORT'=>'DESC',
+            'GET'=>array('user_name_*','user_password_*')
+            );
+var_dump($redis->SORT('user_id',$redis_sort_option));
+//array(8) { [0]=> string(6) "hacker" [1]=> string(9) "hey,im in" [2]=> string(5) "admin" 
+[3]=> string(20) "a_long_long_password" [4]=> string(6) "huangz" [5]=> string(11) "nobodyknows" 
+[6]=> string(4) "jack" [7]=> string(10) "jack201022" }
+
+#------------------------------------
+#1) "hacker"       # 用户名
+#2) "hey,im in"    # 密码
+#3) "jack"
+#4) "jack201022"
+#5) "huangz"
+#6) "nobodyknows"
+#7) "admin"
+#8) "a_long_long_password"
+
+# 注意GET操作是有序的，GET user_name_* GET user_password_* 和 GET user_password_* GET user_name_*返回的结果位置不同
+# 获取name和password 注意GET操作是有序的
+
+$redis_sort_option=array('BY'=>'user_level_*',
+            'SORT'=>'DESC',
+            'GET'=>array('user_password_*','user_name_*')
+            );
+var_dump($redis->SORT('user_id',$redis_sort_option));
+// array(8) { [0]=> string(9) "hey,im in" [1]=> string(6) "hacker" [2]=> string(20) "a_long_long_password" 
+[3]=> string(5) "admin" [4]=> string(11) "nobodyknows" [5]=> string(6) "huangz" [6]=> string(10) "jack201022" 
+[7]=> string(4) "jack" }
+
+GET还有一个特殊的规则——"GET #"，用于获取被排序对象(我们这里的例子是user_id)的当前元素。
+比如你希望user_id按level排序，还要列出id、name和password，可以使用以下命令：
+
+$redis_sort_option=array('BY'=>'user_level_*',
+            'SORT'=>'DESC',
+            'GET'=>array('#','user_password_*','user_name_*')
+            );
+var_dump($redis->SORT('user_id',$redis_sort_option));
+//array(12) { [0]=> string(3) "222" [1]=> string(9) "hey,im in" [2]=> string(6) "hacker" 
+[3]=> string(1) "1" [4]=> string(20) "a_long_long_password" [5]=> string(5) "admin" [6]=> string(1) "2" 
+[7]=> string(11) "nobodyknows" [8]=> string(6) "huangz" [9]=> string(5) "59230" [10]=> string(10) "jack201022" 
+[11]=> string(4) "jack" }
+
+#--------------------------------------------------------------
+#1) "222"          # id
+#2) "hacker"       # name
+#3) "hey,im in"    # password
+#4) "1"
+#5) "admin"
+#6) "a_long_long_password"
+#7) "2"
+#8) "huangz"
+#9) "nobodyknows"
+#10) "59230"
+#11) "jack"
+#12) "jack201022"
+
+
+只获取对象而不排序
+BY修饰符可以将一个不存在的key当作权重，让SORT跳过排序操作。
+该方法用于你希望获取外部对象而又不希望引起排序开销时使用。
+
+# 确保fake_key不存在
+$redis->EXISTS('fake_key');//(integer) 0
+
+# 以fake_key作BY参数，不排序，只GET name 和 GET password
+$redis_sort_option=array('BY'=>'fake_key',
+            'SORT'=>'DESC',
+            'GET'=>array('#','user_name_*','user_password_*')
+            );
+var_dump($redis->SORT('user_id',$redis_sort_option));//array(12) { [0]=> string(3) "222" [1]=> string(6) "hacker" [2]=> string(9) "hey,im in" [3]=> string(5) "59230" [4]=> string(4) "jack" [5]=> string(10) "jack201022" [6]=> string(1) "2" [7]=> string(6) "huangz" [8]=> string(11) "nobodyknows" [9]=> string(1) "1" [10]=> string(5) "admin" [11]=> string(20) "a_long_long_password" }
+
+#----------------------------------------------
+#1) "222"        # id
+#2) "hacker"     # user_name
+#3) "hey,im in"  # password
+#4) "59230"
+#5) "jack"
+#6) "jack201022"
+#7) "2"
+#8) "huangz"
+#9) "nobodyknows"
+#10) "1"
+#11) "admin"
+#12) "a_long_long_password"
+
+保存排序结果
+
+默认情况下，SORT操作只是简单地返回排序结果，如果你希望保存排序结果，
+可以给STORE选项指定一个key作为参数，排序结果将以列表的形式被保存到这个key上。
+(若指定key已存在，则覆盖。)
+
+$redis->EXISTS('user_info_sorted_by_level');  # 确保指定key不存在   //(integer) 0
+$redis_sort_option=array('BY'=>'user_level_*',
+            'GET'=>array('#','user_name_*','user_password_*'),
+            'STORE'=>'user_info_sorted_by_level'
+            );
+
+var_dump($redis->SORT('user_id',$redis_sort_option)); //int(12)
+var_dump($redis->LRANGE('user_info_sorted_by_level', 0 ,11));  # 查看排序结果  //array(12) { [0]=> string(5) "59230" [1]=> string(4) "jack" [2]=> string(10) "jack201022" [3]=> string(1) "2" [4]=> string(6) "huangz" [5]=> string(11) "nobodyknows" [6]=> string(3) "222" [7]=> string(6) "hacker" [8]=> string(9) "hey,im in" [9]=> string(1) "1" [10]=> string(5) "admin" [11]=> string(20) "a_long_long_password" }
+
+#-----------------------------------------------------------------
+#1) "59230"
+#2) "jack"
+#3) "jack201022"
+#4) "2"
+#5) "huangz"
+#6) "nobodyknows"
+#7) "222"
+#8) "hacker"
+#9) "hey,im in"
+#10) "1"
+#11) "admin"
+#12) "a_long_long_password"
+
+一个有趣的用法是将SORT结果保存，用EXPIRE为结果集设置生存时间，这样结果集就成了SORT操作的一个缓存。
+
+这样就不必频繁地调用SORT操作了，只有当结果集过期时，才需要再调用一次SORT操作。
+
+有时候为了正确实现这一用法，你可能需要加锁以避免多个客户端同时进行缓存重建(也就是多个客户端，同一时间进行SORT操作，并保存为结果集)，具体参见SETNX命令。
+
+在GET和BY中使用哈希表
+
+可以使用哈希表特有的语法，在SORT命令中进行GET和BY操作。
+
+# 假设现在我们的用户表新增了一个serial项来为作为每个用户的序列号
+# 序列号以哈希表的形式保存在serial哈希域内。
+
+$redis_hash_testdata_array=array(1=>'23131283',
+                2=>'23810573',
+                222=>'502342349',
+                59230=>'2435829758'
+                );
+
+$redis->HMSET('serial',$redis_hash_testdata_array);
+
+# 我们希望以比较serial中的大小来作为排序user_id的方式
+$redis_sort_option=array('BY'=>'*->serial');
+var_dump($redis->SORT('user_id', $redis_sort_option)); //array(4) { [0]=> string(3) "222" [1]=> string(5) "59230" [2]=> string(1) "2" [3]=> string(1) "1" }
+
+#----------------------------------------
+#1) "222"
+#2) "59230"
+#3) "2"
+#4) "1"
