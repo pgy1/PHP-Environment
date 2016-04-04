@@ -1,0 +1,8 @@
+
+安装redis
+
+先下载redis-windows版本，解压
+打开一个cmd窗口，通过cmd命令，进入到解压文件夹,运行 redis-server.exe redis.conf
+重新打开一个cmd窗口，进入到解压文件夹,运行 redis-cli.exe -h 127.0.0.1 -p 6379
+能切换到redis命令就表明安装成功了
+
