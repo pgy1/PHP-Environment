@@ -26,3 +26,11 @@ php的ext扩展
 2.集成Memcached
 ```
 
+Redis的用法
+```
+Functions函数
+Sort分类
+```
+
+
+
