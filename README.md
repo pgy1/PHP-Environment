@@ -27,9 +27,11 @@ php的ext扩展
 ```
 
 Redis的用法
-```
+
+```php
 Functions函数
 Sort分类
+
 ```
 
 
