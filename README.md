@@ -29,8 +29,8 @@ php的ext扩展[阅读](https://github.com/pgy1/PHP-Environment/blob/master/PHP�
 Redis的用法[阅读](https://github.com/pgy1/PHP-Environment/blob/master/Redis的用法)
 
 ```php
-Functions函数
-Sort分类
+1.Functions函数
+2.Sort分类
 
 ```
 
